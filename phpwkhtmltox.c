@@ -71,14 +71,6 @@ PHP_FUNCTION(wkhtmltox_convert)
     zval *global_params;
     zval *object_params;
     
-    zval **data;
-    HashTable *params_hash;
-    HashPosition pointer;
-    int params_count;
-    char *key;
-    int key_len;
-    long index;
-    
     // initialize optional object_params array
     ALLOC_INIT_ZVAL(object_params);
     array_init(object_params);
@@ -96,59 +88,12 @@ PHP_FUNCTION(wkhtmltox_convert)
         wkhtmltopdf_global_settings *global_settings = wkhtmltopdf_create_global_settings();
         wkhtmltopdf_object_settings *object_settings = wkhtmltopdf_create_object_settings();
         
-        params_hash = Z_ARRVAL_P(global_params);
-        params_count = zend_hash_num_elements(params_hash);
-        for(zend_hash_internal_pointer_reset_ex(params_hash, &pointer); 
-                zend_hash_get_current_data_ex(params_hash, (void **)&data, &pointer) == SUCCESS; 
-                zend_hash_move_forward_ex(params_hash, &pointer)) {
-            zval temp = **data;
-            zval_copy_ctor(&temp);
-            
-            if (zend_hash_get_current_key_ex(params_hash, &key, &key_len, &index, 0, &pointer) == HASH_KEY_IS_STRING) {
-                switch (Z_TYPE(temp)) {
-                    case IS_BOOL:
-                        wkhtmltopdf_set_global_setting(global_settings, key, Z_BVAL(temp));
-                        break;
-                    case IS_STRING:
-                        wkhtmltopdf_set_global_setting(global_settings, key, Z_STRVAL(temp));
-                        break;
-                    case IS_LONG:
-                        wkhtmltopdf_set_global_setting(global_settings, key, Z_LVAL(temp));
-                        break;
-                }
-            }
-            
-            zval_dtor(&temp);
-        }
-        
-        params_hash = Z_ARRVAL_P(object_params);
-        params_count = zend_hash_num_elements(params_hash);
-        for(zend_hash_internal_pointer_reset_ex(params_hash, &pointer); 
-                zend_hash_get_current_data_ex(params_hash, (void **)&data, &pointer) == SUCCESS; 
-                zend_hash_move_forward_ex(params_hash, &pointer)) {
-            zval temp = **data;
-            zval_copy_ctor(&temp);
-            
-            if (zend_hash_get_current_key_ex(params_hash, &key, &key_len, &index, 0, &pointer) == HASH_KEY_IS_STRING) {
-                switch (Z_TYPE(temp)) {
-                    case IS_BOOL:
-                        wkhtmltopdf_set_object_setting(object_settings, key, Z_BVAL(temp));
-                        break;
-                    case IS_STRING:
-                        wkhtmltopdf_set_object_setting(object_settings, key, Z_STRVAL(temp));
-                        break;
-                    case IS_LONG:
-                        wkhtmltopdf_set_object_setting(object_settings, key, Z_LVAL(temp));
-                        break;
-                }
-            }
-            
-            zval_dtor(&temp);
-        }
+        wkhtmltox_set_params((void *)global_settings, (fp)wkhtmltopdf_set_global_setting, global_params);
+        wkhtmltox_set_params((void *)object_settings, (fp)wkhtmltopdf_set_object_setting, object_params);
         
         wkhtmltopdf_converter *c = wkhtmltopdf_create_converter(global_settings);
         wkhtmltopdf_add_object(c, object_settings, NULL);
-        wkhtmltopdf_convert(c);
+        php_printf("%d", wkhtmltopdf_convert(c));
         wkhtmltopdf_destroy_converter(c);
         
         wkhtmltopdf_deinit();
@@ -156,3 +101,39 @@ PHP_FUNCTION(wkhtmltox_convert)
     
     RETURN_TRUE;
 }
+
+void wkhtmltox_set_params(void *settings, fp set_function, zval *params)
+{
+    zval **data;
+    HashTable *params_hash;
+    HashPosition pointer;
+    int params_count;
+    char *key;
+    int key_len;
+    long index;
+    int ret;
+    
+    params_hash = Z_ARRVAL_P(params);
+    params_count = zend_hash_num_elements(params_hash);
+    for(zend_hash_internal_pointer_reset_ex(params_hash, &pointer); 
+            zend_hash_get_current_data_ex(params_hash, (void **)&data, &pointer) == SUCCESS; 
+            zend_hash_move_forward_ex(params_hash, &pointer)) {
+        zval temp = **data;
+        zval_copy_ctor(&temp);
+        
+        if (zend_hash_get_current_key_ex(params_hash, &key, &key_len, &index, 0, &pointer) == HASH_KEY_IS_STRING) {
+            switch (Z_TYPE(temp)) {
+                case IS_BOOL:
+                    ret = set_function(settings, key, Z_BVAL(temp) ? "true" : "false");
+                    break;
+                default:
+                    convert_to_string(&temp);
+                case IS_STRING:
+                    ret = set_function(settings, key, Z_STRVAL(temp));
+                    break;
+            }
+        }
+        
+        zval_dtor(&temp);
+    }
+} 
