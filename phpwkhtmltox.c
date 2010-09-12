@@ -2,6 +2,8 @@
 #include "config.h"
 #endif
 
+#include <string.h>
+
 #include "php.h"
 #include "phpwkhtmltox.h"
 #include "wkhtmltox/pdf.h"
@@ -63,45 +65,94 @@ ZEND_GET_MODULE(phpwkhtmltox)
 
 PHP_FUNCTION(wkhtmltox_convert)
 {
-    char *input;
-    int input_len;
+    char *format;
+    int format_len;
     
-    char *output;
-    int output_len;
+    zval *global_params;
+    zval *object_params;
     
-    zval *params;
     zval **data;
     HashTable *params_hash;
     HashPosition pointer;
     int params_count;
+    char *key;
+    int key_len;
+    long index;
     
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssa", 
-            &input, &input_len, &output, &output_len, &params) == FAILURE) {
+    // initialize optional object_params array
+    ALLOC_INIT_ZVAL(object_params);
+    array_init(object_params);
+    
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|a", 
+            &format, &format_len, &global_params, &object_params) == FAILURE) {
         RETURN_NULL();
     }
     
-    params_hash = Z_ARRVAL_P(params);
-    params_count = zend_hash_num_elements(params_hash);
-    for(zend_hash_internal_pointer_reset_ex(params_hash, &pointer); 
-            zend_hash_get_current_data_ex(params_hash, (void **)&data, &pointer) == SUCCESS; 
-            zend_hash_move_forward_ex(params_hash, &pointer)) {
-        zval temp = **data;
-        zval_copy_ctor(&temp);
-        convert_to_string(&temp);
+    if (strcmp(format, "image") == 0) {
+        // TODO: implement image
+    } else if (strcmp(format, "pdf") == 0) {
+        wkhtmltopdf_init(false);
         
-        zval_dtor(&temp);
+        wkhtmltopdf_global_settings *global_settings = wkhtmltopdf_create_global_settings();
+        wkhtmltopdf_object_settings *object_settings = wkhtmltopdf_create_object_settings();
+        
+        params_hash = Z_ARRVAL_P(global_params);
+        params_count = zend_hash_num_elements(params_hash);
+        for(zend_hash_internal_pointer_reset_ex(params_hash, &pointer); 
+                zend_hash_get_current_data_ex(params_hash, (void **)&data, &pointer) == SUCCESS; 
+                zend_hash_move_forward_ex(params_hash, &pointer)) {
+            zval temp = **data;
+            zval_copy_ctor(&temp);
+            
+            if (zend_hash_get_current_key_ex(params_hash, &key, &key_len, &index, 0, &pointer) == HASH_KEY_IS_STRING) {
+                switch (Z_TYPE(temp)) {
+                    case IS_BOOL:
+                        wkhtmltopdf_set_global_setting(global_settings, key, Z_BVAL(temp));
+                        break;
+                    case IS_STRING:
+                        wkhtmltopdf_set_global_setting(global_settings, key, Z_STRVAL(temp));
+                        break;
+                    case IS_LONG:
+                        wkhtmltopdf_set_global_setting(global_settings, key, Z_LVAL(temp));
+                        break;
+                }
+            }
+            
+            zval_dtor(&temp);
+        }
+        
+        params_hash = Z_ARRVAL_P(object_params);
+        params_count = zend_hash_num_elements(params_hash);
+        for(zend_hash_internal_pointer_reset_ex(params_hash, &pointer); 
+                zend_hash_get_current_data_ex(params_hash, (void **)&data, &pointer) == SUCCESS; 
+                zend_hash_move_forward_ex(params_hash, &pointer)) {
+            zval temp = **data;
+            zval_copy_ctor(&temp);
+            
+            if (zend_hash_get_current_key_ex(params_hash, &key, &key_len, &index, 0, &pointer) == HASH_KEY_IS_STRING) {
+                switch (Z_TYPE(temp)) {
+                    case IS_BOOL:
+                        wkhtmltopdf_set_object_setting(object_settings, key, Z_BVAL(temp));
+                        break;
+                    case IS_STRING:
+                        wkhtmltopdf_set_object_setting(object_settings, key, Z_STRVAL(temp));
+                        break;
+                    case IS_LONG:
+                        wkhtmltopdf_set_object_setting(object_settings, key, Z_LVAL(temp));
+                        break;
+                }
+            }
+            
+            zval_dtor(&temp);
+        }
+        
+        wkhtmltopdf_converter *c = wkhtmltopdf_create_converter(global_settings);
+        wkhtmltopdf_add_object(c, object_settings, NULL);
+        wkhtmltopdf_convert(c);
+        wkhtmltopdf_destroy_converter(c);
+        
+        wkhtmltopdf_deinit();
     }
-    
-    wkhtmltopdf_init(false);
-    wkhtmltopdf_global_settings *global_settings = wkhtmltopdf_create_global_settings();
-    wkhtmltopdf_object_settings *object_settings = wkhtmltopdf_create_object_settings();
-    wkhtmltopdf_set_global_setting(global_settings, "out", output);
-    wkhtmltopdf_set_object_setting(object_settings, "page", input);
-    wkhtmltopdf_converter *c = wkhtmltopdf_create_converter(global_settings);
-    wkhtmltopdf_add_object(c, object_settings, NULL);
-    wkhtmltopdf_convert(c);
-    wkhtmltopdf_destroy_converter(c);
-    wkhtmltopdf_deinit();
     
     RETURN_TRUE;
 }

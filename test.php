@@ -1,5 +1,5 @@
 <?php
 
-wkhtmltox_convert('http://www.google.com', 'test.pdf', array('a' => 1, 'c' => 'test', 4 => 'hello'));
+wkhtmltox_convert('pdf', array('out' => 'test.pdf', 'imageQuality' => '95'), array('page' => 'http://www.google.com/', 'printMediaType' => true));
 
 ?>
