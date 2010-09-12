@@ -65,6 +65,8 @@ ZEND_GET_MODULE(phpwkhtmltox)
 
 PHP_FUNCTION(wkhtmltox_convert)
 {
+    int ret;
+    
     char *format;
     int format_len;
     
@@ -81,7 +83,17 @@ PHP_FUNCTION(wkhtmltox_convert)
     }
     
     if (strcmp(format, "image") == 0) {
-        // TODO: implement image
+        wkhtmltoimage_init(false);
+        
+        wkhtmltoimage_global_settings *global_settings = wkhtmltoimage_create_global_settings();
+        
+        wkhtmltox_set_params((void *)global_settings, (fp)wkhtmltoimage_set_global_setting, global_params);
+        
+        wkhtmltoimage_converter *c = wkhtmltoimage_create_converter(global_settings, NULL);
+        ret = wkhtmltoimage_convert(c);
+        wkhtmltoimage_destroy_converter(c);
+        
+        wkhtmltoimage_deinit();
     } else if (strcmp(format, "pdf") == 0) {
         wkhtmltopdf_init(false);
         
@@ -93,13 +105,13 @@ PHP_FUNCTION(wkhtmltox_convert)
         
         wkhtmltopdf_converter *c = wkhtmltopdf_create_converter(global_settings);
         wkhtmltopdf_add_object(c, object_settings, NULL);
-        php_printf("%d", wkhtmltopdf_convert(c));
+        ret = wkhtmltopdf_convert(c);
         wkhtmltopdf_destroy_converter(c);
         
         wkhtmltopdf_deinit();
     }
     
-    RETURN_TRUE;
+    RETVAL_BOOL((bool)ret);
 }
 
 void wkhtmltox_set_params(void *settings, fp set_function, zval *params)
