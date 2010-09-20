@@ -96,7 +96,7 @@ PHP_FUNCTION(wkhtmltox_convert)
     }
     
     if (strcmp(format, "image") == 0) {
-        wkhtmltoimage_init(false);
+        wkhtmltoimage_init(0);
         
         wkhtmltoimage_global_settings *global_settings = wkhtmltoimage_create_global_settings();
         
@@ -108,7 +108,7 @@ PHP_FUNCTION(wkhtmltox_convert)
         
         wkhtmltoimage_deinit();
     } else if (strcmp(format, "pdf") == 0) {
-        wkhtmltopdf_init(false);
+        wkhtmltopdf_init(0);
         
         wkhtmltopdf_global_settings *global_settings = wkhtmltopdf_create_global_settings();
         wkhtmltox_set_params((void *)global_settings, (fp)wkhtmltopdf_set_global_setting, global_params);
@@ -138,7 +138,7 @@ PHP_FUNCTION(wkhtmltox_convert)
         wkhtmltopdf_deinit();
     }
     
-    RETVAL_BOOL((bool)ret);
+    RETVAL_BOOL(ret);
 }
 
 void wkhtmltox_set_params(void *settings, fp set_function, zval *params)
