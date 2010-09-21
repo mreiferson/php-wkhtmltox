@@ -85,10 +85,6 @@ PHP_FUNCTION(wkhtmltox_convert)
     zval *global_params;
     zval *object_params;
     
-    // initialize optional object_params array
-    ALLOC_INIT_ZVAL(object_params);
-    array_init(object_params);
-    
     // parse out parameters passed
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|a", 
             &format, &format_len, &global_params, &object_params) == FAILURE) {
@@ -137,8 +133,6 @@ PHP_FUNCTION(wkhtmltox_convert)
         
         wkhtmltopdf_deinit();
     }
-    
-    zval_ptr_dtor(object_params);
     
     RETVAL_BOOL(ret);
 }
