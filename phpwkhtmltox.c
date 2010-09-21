@@ -138,6 +138,8 @@ PHP_FUNCTION(wkhtmltox_convert)
         wkhtmltopdf_deinit();
     }
     
+    zval_ptr_dtor(object_params);
+    
     RETVAL_BOOL(ret);
 }
 
