@@ -4,6 +4,7 @@ Special thanks to antialize for creating wkhtmltopdf: http://github.com/antializ
 
 
 Tested on:
+ * CentOS 5.5, PHP 5.3.3 (64-bit)
  * Mac OSX 10.6.4 Snow Leopard, PHP 5.2.12 (64-bit)
 
 
