@@ -2,6 +2,9 @@ PHP bindings for the fabulous libwkhtmltox
 
 Special thanks to antialize for creating wkhtmltopdf: http://github.com/antialize/wkhtmltopdf
 
+For parameters and settings (for users familiar with the command line utility) see:
+http://www.cs.au.dk/~jakobt/libwkhtmltox_0.10.0_doc/pagesettings.html
+
 
 Tested on:
  * CentOS 5.5, PHP 5.3.3 (64-bit)
