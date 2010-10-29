@@ -9,6 +9,9 @@
 #include "wkhtmltox/pdf.h"
 #include "wkhtmltox/image.h"
 
+int wkhtmlimage_initialized = 0;
+int wkhtmltopdf_initialized = 0;
+
 static function_entry phpwkhtmltox_functions[] = {
     PHP_FE(wkhtmltox_convert, NULL)
     {NULL, NULL, NULL}
@@ -21,6 +24,14 @@ PHP_MINIT_FUNCTION(phpwkhtmltox)
 
 PHP_MSHUTDOWN_FUNCTION(phpwkhtmltox)
 {
+    if (wkhtmltoimage_initialized) {
+        wkhtmltoimage_deinit();
+    }
+    
+    if (wkhtmltopdf_initialized) {
+        wkhtmltopdf_deinit();
+    }
+    
     return SUCCESS;
 }
 
@@ -92,7 +103,9 @@ PHP_FUNCTION(wkhtmltox_convert)
     }
     
     if (strcmp(format, "image") == 0) {
-        wkhtmltoimage_init(0);
+        if (!wkhtmltoimage_initialized) {
+            wkhtmltoimage_initialized = wkhtmltoimage_init(0);
+        }
         
         wkhtmltoimage_global_settings *global_settings = wkhtmltoimage_create_global_settings();
         
@@ -101,10 +114,10 @@ PHP_FUNCTION(wkhtmltox_convert)
         wkhtmltoimage_converter *c = wkhtmltoimage_create_converter(global_settings, NULL);
         ret = wkhtmltoimage_convert(c);
         wkhtmltoimage_destroy_converter(c);
-        
-        wkhtmltoimage_deinit();
     } else if (strcmp(format, "pdf") == 0) {
-        wkhtmltopdf_init(0);
+        if (!wkhtmltopdf_initialized) {
+            wkhtmltopdf_initialized = wkhtmltopdf_init(0);
+        }
         
         wkhtmltopdf_global_settings *global_settings = wkhtmltopdf_create_global_settings();
         wkhtmltox_set_params((void *)global_settings, (fp)wkhtmltopdf_set_global_setting, global_params);
@@ -130,8 +143,6 @@ PHP_FUNCTION(wkhtmltox_convert)
         
         ret = wkhtmltopdf_convert(c);
         wkhtmltopdf_destroy_converter(c);
-        
-        wkhtmltopdf_deinit();
     }
     
     RETVAL_BOOL(ret);
