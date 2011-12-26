@@ -1,8 +1,8 @@
 PHP_ARG_WITH(phpwkhtmltox, [for libwkhtmltox support],
-[  --with-phpwkhtmltox     Include libwkhtmltox support])
+[  --with-phpwkhtmltox=[DIR]     Include libwkhtmltox support])
 
 if test "$PHP_PHPWKHTMLTOX" != "no"; then
-    for i in /usr /usr/local /opt; do
+    for i in $PHP_PHPWKHTMLTOX /usr /usr/local /opt; do
         if test -f $i/include/wkhtmltox/pdf.h; then
             WKHTMLTOX_LIB_DIR=$i/lib
             WKHTMLTOX_INC_DIR=$i/include
