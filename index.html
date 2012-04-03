@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>php-wkhtmltox by mreiferson</title>
+    
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>php-wkhtmltox</h1>
+        <p>PHP bindings for libwkhtmltox</p>
+        <p class="view"><a href="https://github.com/mreiferson/php-wkhtmltox">View the Project on GitHub <small>mreiferson/php-wkhtmltox</small></a></p>
+        <ul>
+          <li><a href="https://github.com/mreiferson/php-wkhtmltox/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/mreiferson/php-wkhtmltox/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/mreiferson/php-wkhtmltox">Fork On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p>PHP bindings for the fabulous <code>libwkhtmltox</code></p>
+
+<p>Special thanks to antialize for creating <a href="http://github.com/antialize/wkhtmltopdf">wkhtmltopdf</a></p>
+
+<p>For parameters and settings (for users familiar with the command line utility) see:</p>
+
+<pre><code><a href="http://www.cs.au.dk/~jakobt/libwkhtmltox_0.10.0_doc/pagesettings.html">http://www.cs.au.dk/~jakobt/libwkhtmltox_0.10.0_doc/pagesettings.html</a>
+</code></pre>
+
+<h3>Installation</h3>
+
+<pre><code>$ phpize
+$ ./configure
+$ make install
+</code></pre>
+
+<p>edit your <code>php.ini</code> and add:</p>
+
+<pre><code>extension=phpwkhtmltox.so
+</code></pre>
+
+<h3>Tested on:</h3>
+
+<ul>
+<li>CentOS 5.5, PHP 5.3.3 (64-bit)</li>
+<li>Mac OSX 10.6.4 Snow Leopard, PHP 5.2.12 (64-bit)</li>
+</ul><h3>Pre-requisites on all platforms:</h3>
+
+<ul>
+<li>you need <code>libwkhtmltox.*</code> somewhere in your LD path (<code>/usr/local/lib</code>)</li>
+<li>you need the directory <code>src/include/wkhtmltox</code> from <code>wkhtmltopdf</code> somewhere on your include path (<code>/usr/local/include</code>)</li>
+</ul><h3>OSX Notes:</h3>
+
+<p>Until <a href="http://bugreports.qt.nokia.com/browse/QTBUG-5952">this bug</a> is fixed you need <code>qt_menu.nib</code> directory from the QT source tree in the same directory as your <code>libwkhtmltox.*</code> library files</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/mreiferson">mreiferson</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+  </body>
+</html>
