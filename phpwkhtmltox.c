@@ -11,7 +11,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(phpwkhtmltox)
 
-static function_entry phpwkhtmltox_functions[] = {
+static zend_function_entry phpwkhtmltox_functions[] = {
     PHP_FE(wkhtmltox_convert, NULL)
     {NULL, NULL, NULL}
 };
