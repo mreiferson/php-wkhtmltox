@@ -1,10 +1,10 @@
 PHP bindings for the fabulous `libwkhtmltox`
 
-Special thanks to antialize for creating [wkhtmltopdf](http://github.com/antialize/wkhtmltopdf)
+Special thanks to antialize for creating [wkhtmltopdf](http://wkhtmltopdf.org)
 
 For parameters and settings (for users familiar with the command line utility) see:
 
-    http://www.cs.au.dk/~jakobt/libwkhtmltox_0.10.0_doc/pagesettings.html
+    http://wkhtmltopdf.org/libwkhtmltox/pagesettings.html
 
 ### Installation
 
@@ -27,4 +27,4 @@ edit your `php.ini` and add:
  * you need the directory `src/include/wkhtmltox` from `wkhtmltopdf` somewhere on your include path (`/usr/local/include`)
 
 ### OSX Notes:
-Until [this bug](http://bugreports.qt.nokia.com/browse/QTBUG-5952) is fixed you need `qt_menu.nib` directory from the QT source tree in the same directory as your `libwkhtmltox.*` library files
+Until [this bug](http://bugreports.qt-project.org/browse/QTBUG-5952) is fixed you need `qt_menu.nib` directory from the QT source tree in the same directory as your `libwkhtmltox.*` library files
