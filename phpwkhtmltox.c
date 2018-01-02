@@ -87,7 +87,12 @@ ZEND_GET_MODULE(phpwkhtmltox)
 PHP_FUNCTION(wkhtmltox_convert)
 {
     // used for iterating over the object params
+    #if PHP_API_VERSION >= 20151012
+    zval *data;
+    #else
     zval **data;
+    #endif
+
     HashTable *params_hash;
     HashPosition pointer;
     int params_count;
@@ -97,7 +102,11 @@ PHP_FUNCTION(wkhtmltox_convert)
     
     // receives the format parameter
     char *format;
-    int format_len;
+    #if PHP_API_VERSION >= 20151012
+    zend_ulong format_len;
+    #else
+    uint format_len;
+    #endif
     
     // receives the global and object parameters
     zval *global_params;
@@ -133,10 +142,22 @@ PHP_FUNCTION(wkhtmltox_convert)
         
         params_hash = Z_ARRVAL_P(object_params);
         params_count = zend_hash_num_elements(params_hash);
-        for(zend_hash_internal_pointer_reset_ex(params_hash, &pointer); 
-                zend_hash_get_current_data_ex(params_hash, (void **)&data, &pointer) == SUCCESS; 
+        for(zend_hash_internal_pointer_reset_ex(params_hash, &pointer);
+                #if PHP_API_VERSION >= 20151012
+                zend_hash_has_more_elements_ex(params_hash, &pointer) == SUCCESS;
+                #else
+                zend_hash_get_current_data_ex(params_hash, (void **)&data, &pointer) == SUCCESS;
+                #endif
                 zend_hash_move_forward_ex(params_hash, &pointer)) {
-            zval temp = **data;
+            zval temp;
+
+            #if PHP_API_VERSION >= 20151012
+            data = zend_hash_get_current_data_ex(params_hash, &pointer);
+            temp = *data;
+            #else
+            temp = **data;
+            #endif
+
             zval_copy_ctor(&temp);
             
             if (Z_TYPE(temp) == IS_ARRAY) {
@@ -157,32 +178,71 @@ PHP_FUNCTION(wkhtmltox_convert)
 
 void wkhtmltox_set_params(void *settings, fp set_function, zval *params)
 {
+    #if PHP_API_VERSION >= 20151012
+    zval *data;
+    #else
     zval **data;
+    #endif
+
     HashTable *params_hash;
     HashPosition pointer;
     int params_count;
     
+    #if PHP_API_VERSION >= 20151012
+    zend_string *key;
+    zend_ulong index;
+    #else
     char *key;
-    int key_len;
-    long index;
+    uint key_len;
+    ulong index;
+    #endif
     
     params_hash = Z_ARRVAL_P(params);
     params_count = zend_hash_num_elements(params_hash);
-    for(zend_hash_internal_pointer_reset_ex(params_hash, &pointer); 
-            zend_hash_get_current_data_ex(params_hash, (void **)&data, &pointer) == SUCCESS; 
+    for(zend_hash_internal_pointer_reset_ex(params_hash, &pointer);
+            #if PHP_API_VERSION >= 20151012
+            zend_hash_has_more_elements_ex(params_hash, &pointer) == SUCCESS;
+            #else
+            zend_hash_get_current_data_ex(params_hash, (void **)&data, &pointer) == SUCCESS;
+            #endif
             zend_hash_move_forward_ex(params_hash, &pointer)) {
-        zval temp = **data;
+        zval temp;
+
+        #if PHP_API_VERSION >= 20151012
+        data = zend_hash_get_current_data_ex(params_hash, &pointer);
+        temp = *data;
+        #else
+        temp = **data;
+        #endif
+
         zval_copy_ctor(&temp);
         
+        #if PHP_API_VERSION >= 20151012
+        if (zend_hash_get_current_key_ex(params_hash, &key, &index, &pointer) == HASH_KEY_IS_STRING) {
+        #else
         if (zend_hash_get_current_key_ex(params_hash, &key, &key_len, &index, 0, &pointer) == HASH_KEY_IS_STRING) {
+        #endif
             switch (Z_TYPE(temp)) {
+                #if PHP_API_VERSION >= 20151012
+                case IS_TRUE:
+                    set_function(settings, key->val, "true");
+                    break;
+                case IS_FALSE:
+                    set_function(settings, key->val, "false");
+                    break;
+                #else
                 case IS_BOOL:
                     set_function(settings, key, Z_BVAL(temp) ? "true" : "false");
                     break;
+                #endif
                 default:
                     convert_to_string(&temp);
                 case IS_STRING:
+                    #if PHP_API_VERSION >= 20151012
+                    set_function(settings, key->val, Z_STRVAL(temp));
+                    #else
                     set_function(settings, key, Z_STRVAL(temp));
+                    #endif
                     break;
             }
             
